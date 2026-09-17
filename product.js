@@ -55,14 +55,29 @@ function fallbackVisual(product) {
 function wireProductOptions(host, product) {
   const sizeButtons = [...host.querySelectorAll('.product-size-option')];
   const buyButton = host.querySelector('.product-buy');
+  const cartButton = host.querySelector('.product-add-cart');
   const feedback = host.querySelector('.product-size-feedback');
   let selectedSize = '';
 
-  if (!buyButton) return;
+  const setFeedback = (text, type = '') => {
+    if (!feedback) return;
+    feedback.textContent = text;
+    feedback.classList.remove('is-ok', 'is-error');
+    if (type) feedback.classList.add(type);
+  };
+
+  const requireSize = () => {
+    if (!sizeButtons.length || selectedSize) return true;
+    setFeedback('Selecione um tamanho para continuar.', 'is-error');
+    sizeButtons[0]?.focus();
+    return false;
+  };
 
   if (sizeButtons.length) {
-    buyButton.classList.add('is-waiting-size');
-    buyButton.setAttribute('aria-disabled', 'true');
+    buyButton?.classList.add('is-waiting-size');
+    buyButton?.setAttribute('aria-disabled', 'true');
+    cartButton?.classList.add('is-waiting-size');
+    cartButton?.setAttribute('aria-disabled', 'true');
   }
 
   sizeButtons.forEach(button => {
@@ -74,26 +89,31 @@ function wireProductOptions(host, product) {
         item.setAttribute('aria-pressed', selected ? 'true' : 'false');
       });
 
-      buyButton.classList.remove('is-waiting-size');
-      buyButton.setAttribute('aria-disabled', 'false');
+      [buyButton, cartButton].forEach(action => {
+        action?.classList.remove('is-waiting-size');
+        action?.setAttribute('aria-disabled', 'false');
+      });
 
-      if (feedback) {
-        feedback.textContent = `Tamanho ${selectedSize} selecionado.`;
-        feedback.classList.remove('is-error');
-        feedback.classList.add('is-ok');
-      }
+      setFeedback(`Tamanho ${selectedSize} selecionado.`, 'is-ok');
     });
   });
 
-  buyButton.addEventListener('click', event => {
-    if (sizeButtons.length && !selectedSize) {
+  cartButton?.addEventListener('click', event => {
+    event.preventDefault();
+    if (!requireSize()) return;
+
+    if (!window.NBCart?.addItem) {
+      setFeedback('Não foi possível abrir o carrinho. Atualize a página e tente novamente.', 'is-error');
+      return;
+    }
+
+    window.NBCart.addItem(product, selectedSize, 1);
+    setFeedback(`${product.name || 'Peça'} — tamanho ${selectedSize} adicionado ao carrinho.`, 'is-ok');
+  });
+
+  buyButton?.addEventListener('click', event => {
+    if (!requireSize()) {
       event.preventDefault();
-      if (feedback) {
-        feedback.textContent = 'Selecione um tamanho para continuar.';
-        feedback.classList.remove('is-ok');
-        feedback.classList.add('is-error');
-      }
-      sizeButtons[0]?.focus();
       return;
     }
 
@@ -140,8 +160,9 @@ function render() {
       <p class="product-detail-description">${esc(product.description || '')}</p>
       ${sizes ? `<div class="product-size-block"><span class="product-detail-label">Tamanhos</span><div class="product-sizes">${sizes}</div>${canBuy ? '<p class="product-size-feedback" aria-live="polite">Escolha seu tamanho.</p>' : '<p class="product-size-feedback">Tamanhos serão liberados junto com a compra.</p>'}</div>` : ''}
       <div class="product-detail-actions">
+        ${canBuy ? '<button type="button" class="btn btn-solid product-add-cart">Adicionar ao carrinho</button>' : ''}
         ${action || '<span class="product-no-action">Compra ainda não liberada.</span>'}
-        <a class="btn btn-ghost" href="index.html#drop">Continuar olhando</a>
+        <a class="btn btn-ghost product-continue" href="index.html#drop">Continuar olhando</a>
       </div>
       <div class="product-detail-notes">
         <div><strong>Modelagem</strong><span>Oversized streetwear</span></div>
