@@ -11,6 +11,11 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+/* Cursor cleanup: keep normal arrow on text blocks and only show hand on real actions */
+body,main,section,article,header,footer,nav,div,p,span,strong,small,h1,h2,h3,h4,h5,h6,ul,ol,li{cursor:default}
+input,textarea,[contenteditable="true"]{cursor:text}
+a,button,.btn,.nav-cta,.brand,.product-card-link,.product-card-link *,.product-link,.product-size-option,.product-add-cart,.product-buy,.product-continue,.cart-trigger,.cart-close,.cart-remove,.cart-clear,.cart-qty button{cursor:pointer}
+
 a{color:inherit;text-decoration:none}
 img{max-width:100%;display:block}
 ::selection{background:#fff;color:#000}
