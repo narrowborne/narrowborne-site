@@ -23,6 +23,8 @@
     whatsappMessage: 'Olá! Vim pelo atendimento do site e preciso de ajuda.',
     offlineText: 'Nosso atendimento humano está fora do horário agora. O robô continua disponível e sua mensagem no WhatsApp poderá ser respondida posteriormente.',
     schedule: { timezone: 'America/Sao_Paulo', days: [1, 2, 3, 4, 5, 6], start: '09:00', end: '18:00' },
+    knowledgeEnabled: true,
+    disabledFaqIds: [],
     faqs: [],
     ...(store.chat || {})
   };
@@ -32,13 +34,48 @@
   };
   if (config.enabled === false) return;
 
+  const TOKEN_ALIASES = {
+    vc: 'voce', vcs: 'voces', ce: 'voce', cê: 'voce', q: 'que', pq: 'porque', pqp: 'problema',
+    pra: 'para', pro: 'para', pros: 'para', ta: 'esta', tava: 'estava', to: 'estou', tou: 'estou',
+    n: 'nao', nn: 'nao', ñ: 'nao', s: 'sim', blz: 'beleza', vlw: 'valeu', obg: 'obrigado',
+    zap: 'whatsapp', whats: 'whatsapp', wpp: 'whatsapp', insta: 'instagram', pgto: 'pagamento',
+    pg: 'pagamento', cartaozinho: 'cartao', rastrear: 'rastreio', rastreamento: 'rastreio',
+    camiseta: 'camiseta', camisa: 'camiseta', camisas: 'camisetas', produto: 'produto', produtos: 'produtos'
+  };
+
   const normalize = (value = '') => String(value)
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, ' ')
     .replace(/\s+/g, ' ')
-    .trim();
+    .trim()
+    .split(' ')
+    .map(token => TOKEN_ALIASES[token] || token)
+    .join(' ');
+
+  function buildFaqCatalog() {
+    const builtIns = config.knowledgeEnabled === false
+      ? []
+      : (((window.NB_CHAT_KNOWLEDGE || {}).faqs || []).map(item => ({ ...item, source: 'builtin' })));
+    const configured = (Array.isArray(config.faqs) ? config.faqs : []).map(item => ({ ...item, source: 'custom' }));
+    const disabled = new Set((config.disabledFaqIds || []).map(String));
+    const merged = new Map();
+    builtIns.forEach(item => { if (item && item.id && !disabled.has(String(item.id))) merged.set(String(item.id), item); });
+    configured.forEach((item, index) => {
+      if (!item || !item.answer || disabled.has(String(item.id))) return;
+      const id = String(item.id || `custom-${index}`);
+      const existing = merged.get(id) || {};
+      const keywords = [...new Set([
+        ...(Array.isArray(existing.keywords) ? existing.keywords : []),
+        ...faqKeywords(item)
+      ])];
+      merged.set(id, { ...existing, ...item, keywords });
+    });
+    return [...merged.values()];
+  }
+
+  const faqCatalog = buildFaqCatalog();
 
   const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
@@ -54,10 +91,11 @@
       const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}');
       return {
         sessionId: saved.sessionId || createSessionId(),
-        messages: Array.isArray(saved.messages) ? saved.messages.slice(-MAX_HISTORY) : []
+        messages: Array.isArray(saved.messages) ? saved.messages.slice(-MAX_HISTORY) : [],
+        lastIntentId: saved.lastIntentId || ''
       };
     } catch (_) {
-      return { sessionId: createSessionId(), messages: [] };
+      return { sessionId: createSessionId(), messages: [], lastIntentId: '' };
     }
   }
 
@@ -70,7 +108,8 @@
     try {
       localStorage.setItem(HISTORY_KEY, JSON.stringify({
         sessionId: state.sessionId,
-        messages: state.messages.slice(-MAX_HISTORY)
+        messages: state.messages.slice(-MAX_HISTORY),
+        lastIntentId: state.lastIntentId || ''
       }));
     } catch (_) {}
   }
@@ -126,32 +165,137 @@
   }
 
   function faqKeywords(faq) {
-    if (Array.isArray(faq.keywords)) return faq.keywords;
-    return String(faq.keywords || '').split(',').map(item => item.trim()).filter(Boolean);
+    const keywords = Array.isArray(faq.keywords)
+      ? faq.keywords
+      : String(faq.keywords || '').split(',').map(item => item.trim()).filter(Boolean);
+    const phrases = Array.isArray(faq.phrases) ? faq.phrases : [];
+    return [...keywords, ...phrases];
+  }
+
+  const STOP_WORDS = new Set([
+    'a', 'as', 'o', 'os', 'um', 'uma', 'uns', 'umas', 'de', 'da', 'do', 'das', 'dos', 'e', 'ou',
+    'em', 'no', 'na', 'nos', 'nas', 'para', 'por', 'com', 'sem', 'que', 'qual', 'quais', 'como',
+    'eu', 'me', 'meu', 'minha', 'voce', 'voces', 'isso', 'esse', 'essa', 'tem', 'ter', 'esta', 'estou'
+  ]);
+
+  function meaningfulTokens(value) {
+    return normalize(value).split(' ').filter(token => token && !STOP_WORDS.has(token));
+  }
+
+  function wordDistance(a, b) {
+    if (a === b) return 0;
+    if (!a.length) return b.length;
+    if (!b.length) return a.length;
+    const previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+    for (let i = 1; i <= a.length; i += 1) {
+      const current = [i];
+      for (let j = 1; j <= b.length; j += 1) {
+        current[j] = Math.min(
+          current[j - 1] + 1,
+          previous[j] + 1,
+          previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+        );
+      }
+      for (let j = 0; j < current.length; j += 1) previous[j] = current[j];
+    }
+    return previous[b.length];
+  }
+
+  function wordsMatch(messageWord, expectedWord) {
+    if (messageWord === expectedWord) return true;
+    if (expectedWord.length < 5 || messageWord.length < 5) return false;
+    const allowedDistance = expectedWord.length >= 8 ? 2 : 1;
+    return Math.abs(messageWord.length - expectedWord.length) <= allowedDistance
+      && wordDistance(messageWord, expectedWord) <= allowedDistance;
+  }
+
+  function scoreFaq(faq, text, messageTokens) {
+    let score = Number(faq.priority || 0);
+    let strongMatches = 0;
+    const keywordScores = [];
+
+    faqKeywords(faq).forEach(keyword => {
+      const key = normalize(keyword);
+      if (!key) return;
+      const keyTokens = meaningfulTokens(key);
+      if (!keyTokens.length) return;
+
+      if (text === key) {
+        keywordScores.push(12);
+        strongMatches += 1;
+        return;
+      }
+      if (key.includes(' ') && (` ${text} `).includes(` ${key} `)) {
+        keywordScores.push(9 + Math.min(3, keyTokens.length));
+        strongMatches += 1;
+        return;
+      }
+
+      const matched = keyTokens.filter(expected => messageTokens.some(word => wordsMatch(word, expected))).length;
+      if (matched === keyTokens.length) {
+        keywordScores.push(keyTokens.length > 1 ? 5 + keyTokens.length : 3.5);
+        strongMatches += 1;
+      } else if (keyTokens.length > 1 && matched >= 2 && matched / keyTokens.length >= 0.6) {
+        keywordScores.push(2.5 + matched);
+      }
+    });
+
+    keywordScores.sort((a, b) => b - a);
+    score += (keywordScores[0] || 0) + (keywordScores[1] || 0) * 0.25 + (keywordScores[2] || 0) * 0.1;
+
+    const questionTokens = meaningfulTokens(faq.question || '');
+    const questionMatches = questionTokens.filter(expected => messageTokens.some(word => wordsMatch(word, expected))).length;
+    score += questionMatches * 0.45;
+
+    const exclusions = Array.isArray(faq.negativeKeywords) ? faq.negativeKeywords : [];
+    if (exclusions.some(keyword => text.includes(normalize(keyword)))) score -= 12;
+    const isFollowUp = /^(e |mas |tambem |quanto |quando |como assim|isso|ele |ela |sim$|nao$)/.test(text);
+    if (String(faq.id || '') === String(state.lastIntentId || '') && messageTokens.length <= 5 && isFollowUp) score += 0.8;
+    if (!strongMatches && questionMatches < 2) score = Math.min(score, 2.4);
+    return score;
   }
 
   function findFaq(message) {
     const text = normalize(message);
+    const messageTokens = meaningfulTokens(text);
     let best = null;
     let bestScore = 0;
 
-    (config.faqs || []).forEach(faq => {
+    faqCatalog.forEach(faq => {
       if (!faq || !faq.answer) return;
-      let score = 0;
-      faqKeywords(faq).forEach(keyword => {
-        const key = normalize(keyword);
-        if (key && text.includes(key)) score += key.includes(' ') ? 5 : 3;
-      });
-      normalize(faq.question || '').split(' ').filter(word => word.length > 3).forEach(word => {
-        if (text.includes(word)) score += 0.6;
-      });
+      const score = scoreFaq(faq, text, messageTokens);
       if (score > bestScore) {
         best = faq;
         bestScore = score;
       }
     });
 
-    return bestScore >= 2.5 ? best : null;
+    return bestScore >= 3.2 ? best : null;
+  }
+
+  function hashText(value = '') {
+    let hash = 2166136261;
+    String(value).split('').forEach(char => {
+      hash ^= char.charCodeAt(0);
+      hash = Math.imul(hash, 16777619);
+    });
+    return Math.abs(hash >>> 0);
+  }
+
+  function pickVariant(items, seed, offset = 0) {
+    const list = (items || []).filter(item => typeof item === 'string');
+    if (!list.length) return '';
+    return list[(hashText(`${seed}-${offset}`) + offset) % list.length];
+  }
+
+  function naturalFaqAnswer(faq, message) {
+    const answers = Array.isArray(faq.answers) && faq.answers.length ? faq.answers : [faq.answer];
+    const base = pickVariant(answers, `${state.sessionId}-${message}-${faq.id}`, 7) || faq.answer;
+    if (faq.style === 'direct') return base;
+    const knowledge = window.NB_CHAT_KNOWLEDGE || {};
+    const opener = pickVariant(knowledge.openers || ['Entendi.'], `${message}-${faq.id}`, 11);
+    const closer = pickVariant(knowledge.closers || [''], `${state.sessionId}-${message}`, 19);
+    return [opener, base, faq.action === 'whatsapp' ? '' : closer].filter(Boolean).join(' ');
   }
 
   function productSizeAnswer() {
@@ -174,6 +318,29 @@
     return `No momento, estas são as peças exibidas na loja:\n${lines.join('\n')}\nVocê pode abrir cada produto para ver descrição, tamanhos e opções de compra.`;
   }
 
+  function findMentionedProduct(message) {
+    const text = normalize(message);
+    let bestProduct = null;
+    let bestScore = 0;
+    (store.products || []).filter(product => product.active !== false).forEach(product => {
+      const tokens = meaningfulTokens(product.name || '');
+      const score = tokens.filter(token => text.includes(token)).length;
+      if (tokens.length && score > bestScore && (score === tokens.length || score >= 2)) {
+        bestProduct = product;
+        bestScore = score;
+      }
+    });
+    return bestProduct;
+  }
+
+  function productDetailAnswer(product) {
+    if (!product) return productAnswer();
+    const sizes = Array.isArray(product.sizes) && product.sizes.length ? product.sizes.join(', ') : 'a confirmar';
+    const value = product.price || product.status || 'valor a confirmar';
+    const description = product.description ? ` ${product.description}` : '';
+    return `${product.name} — ${value}. Tamanhos informados: ${sizes}.${description}`;
+  }
+
   function businessHoursAnswer() {
     const labels = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
     const days = (config.schedule.days || []).map(Number).sort((a, b) => a - b).map(day => labels[day]).filter(Boolean);
@@ -184,38 +351,41 @@
   function answerFor(message) {
     const text = normalize(message);
 
-    if (/\b(atendente|pessoa|humano|whatsapp|falar com alguem)\b/.test(text)) {
+    if (/\b(atendente|pessoa real|atendimento humano|falar com humano|falar com alguem|falar com uma pessoa|chamar no whatsapp|abrir o whatsapp|whatsapp da loja|numero do whatsapp|qual o whatsapp)\b/.test(text) || text === 'whatsapp') {
       return { text: humanIsAvailable()
         ? 'Claro. Vou abrir o WhatsApp oficial com o contexto desta conversa para o atendente conseguir ajudar mais rápido.'
         : config.offlineText,
-        action: 'whatsapp' };
-    }
-
-    if (/\b(tamanho|tamanhos|medida|medidas|veste|modelagem)\b/.test(text)) {
-      return { text: productSizeAnswer() };
-    }
-
-    if (/\b(horario|horarios|hora|atendimento humano|abre|aberto|fecha|fechado|funcionamento)\b/.test(text)) {
-      return { text: businessHoursAnswer() };
-    }
-
-    if (/\b(produto|produtos|camiseta|camisetas|peca|pecas|drop|colecao|disponivel|estoque)\b/.test(text)) {
-      return { text: productAnswer() };
-    }
-
-    if (/\b(oi|ola|eai|opa|bom dia|boa tarde|boa noite)\b/.test(text) && text.split(' ').length <= 5) {
-      return { text: 'Olá! Que bom ter você por aqui. Pode escrever sua dúvida sobre pagamento, entrega, trocas, tamanhos, produtos ou pedidos.' };
+        action: 'whatsapp', intent: 'atendente' };
     }
 
     const faq = findFaq(message);
     if (faq) {
-      const needsHuman = /\b(pedido|rastreio|rastrear|codigo|troca|devolucao|problema)\b/.test(text);
-      return { text: faq.answer, action: needsHuman ? 'whatsapp' : '' };
+      state.lastIntentId = faq.id || '';
+      persist();
+      const product = findMentionedProduct(message);
+      if (faq.dynamic === 'sizes') return { text: product ? productDetailAnswer(product) : productSizeAnswer(), intent: faq.id };
+      if (faq.dynamic === 'products') return { text: product ? productDetailAnswer(product) : productAnswer(), action: faq.action || '', intent: faq.id };
+      if (faq.dynamic === 'hours') return { text: businessHoursAnswer(), intent: faq.id };
+      const inferredHuman = /^(pedido|trocas|devolucao|defeito|reembolso|rastreio|atraso|item-|pagamento-pendente|cobranca-duplicada)/.test(String(faq.id || ''));
+      return { text: naturalFaqAnswer(faq, message), action: faq.action || (inferredHuman ? 'whatsapp' : ''), intent: faq.id };
+    }
+
+    const product = findMentionedProduct(message);
+    if (product) return { text: productDetailAnswer(product), intent: 'produto-dinamico' };
+
+    if (/\b(produto|produtos|camiseta|camisetas|peca|pecas|drop|colecao|disponivel|estoque)\b/.test(text)) {
+      return { text: productAnswer(), intent: 'produtos' };
     }
 
     return {
-      text: 'Ainda não encontrei uma resposta segura para essa dúvida. Você pode explicar de outro jeito ou falar diretamente com um atendente.',
-      action: 'whatsapp'
+      text: pickVariant([
+        'Ainda não encontrei uma resposta segura para essa dúvida. Você pode explicar de outro jeito ou falar diretamente com um atendente.',
+        'Não quero te passar uma informação errada. Tente escrever com mais detalhes ou use o atendimento humano.',
+        'Essa pergunta precisa de uma confirmação da equipe. Se preferir, posso abrir o WhatsApp oficial agora.',
+        'Não consegui identificar exatamente o que você precisa. Diga se a dúvida é sobre produto, pagamento, entrega, pedido ou troca.'
+      ], `${state.sessionId}-${message}`, 31),
+      action: 'whatsapp',
+      intent: 'fallback'
     };
   }
 
@@ -331,7 +501,8 @@
   function renderSuggestions() {
     const host = document.getElementById('nbChatSuggestions');
     if (!host) return;
-    const questions = (config.faqs || []).map(faq => faq.question).filter(Boolean).slice(0, 4);
+    const featured = faqCatalog.filter(faq => faq.featured);
+    const questions = (featured.length ? featured : faqCatalog).map(faq => faq.question).filter(Boolean).slice(0, 4);
     host.innerHTML = questions.map(question => `<button type="button" data-chat-question="${escapeHtml(question)}">${escapeHtml(question)}</button>`).join('');
   }
 
@@ -417,7 +588,20 @@
     open: openPanel,
     close: closePanel,
     ask: sendCustomerMessage,
-    whatsapp: transferToWhatsapp
+    whatsapp: transferToWhatsapp,
+    resolve: answerFor,
+    stats: {
+      topics: faqCatalog.length,
+      keywords: faqCatalog.reduce((total, faq) => total + faqKeywords(faq).length, 0),
+      estimatedQuestionVariations: faqCatalog.reduce((total, faq) => total + faqKeywords(faq).length * 4, 0),
+      estimatedResponseVariations: faqCatalog.reduce((total, faq) => {
+        const answerCount = Array.isArray(faq.answers) && faq.answers.length ? faq.answers.length : 1;
+        if (faq.style === 'direct') return total + answerCount;
+        const knowledge = window.NB_CHAT_KNOWLEDGE || {};
+        return total + answerCount * Math.max(1, (knowledge.openers || []).length) * Math.max(1, (knowledge.closers || []).length);
+      }, 0),
+      knowledgeVersion: (window.NB_CHAT_KNOWLEDGE || {}).version || 'custom'
+    }
   };
 
   if (document.readyState === 'loading') {

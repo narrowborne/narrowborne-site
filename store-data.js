@@ -24,6 +24,8 @@ window.NB_STORE_DATA = {
       start: "09:00",
       end: "18:00"
     },
+    knowledgeEnabled: true,
+    disabledFaqIds: [],
     faqs: [
       {
         id: "pagamento",
