@@ -147,8 +147,8 @@ function render() {
     ? `<div class="product-detail-visual product-detail-photo"><img src="${esc(image)}" alt="${esc(product.name)}"></div>`
     : fallbackVisual(product);
   const action = buildAction(product, data.brand || {});
-  const canBuy = Boolean(action);
-  const sizes = (product.sizes || []).map(size => `<button type="button" class="product-size-option" data-size="${esc(size)}" aria-pressed="false" ${canBuy ? '' : 'disabled'}>${esc(size)}</button>`).join('');
+  const canAddToCart = Boolean(product.price);
+  const sizes = (product.sizes || []).map(size => `<button type="button" class="product-size-option" data-size="${esc(size)}" aria-pressed="false" ${canAddToCart ? '' : 'disabled'}>${esc(size)}</button>`).join('');
   const price = product.price ? `<div class="product-detail-price">${esc(product.price)}</div>` : `<div class="product-detail-status">${esc(product.status || 'Em breve')}</div>`;
 
   host.innerHTML = `<section class="product-detail">
@@ -158,10 +158,10 @@ function render() {
       <h1>${esc(product.name || '')}</h1>
       ${price}
       <p class="product-detail-description">${esc(product.description || '')}</p>
-      ${sizes ? `<div class="product-size-block"><span class="product-detail-label">Tamanhos</span><div class="product-sizes">${sizes}</div>${canBuy ? '<p class="product-size-feedback" aria-live="polite">Escolha seu tamanho.</p>' : '<p class="product-size-feedback">Tamanhos serão liberados junto com a compra.</p>'}</div>` : ''}
+      ${sizes ? `<div class="product-size-block"><span class="product-detail-label">Tamanhos</span><div class="product-sizes">${sizes}</div>${canAddToCart ? '<p class="product-size-feedback" aria-live="polite">Escolha seu tamanho.</p>' : '<p class="product-size-feedback">Tamanhos serão liberados junto com a compra.</p>'}</div>` : ''}
       <div class="product-detail-actions">
-        ${canBuy ? '<button type="button" class="btn btn-solid product-add-cart">Adicionar ao carrinho</button>' : ''}
-        ${action || '<span class="product-no-action">Compra ainda não liberada.</span>'}
+        ${canAddToCart ? '<button type="button" class="btn btn-solid product-add-cart">Adicionar ao carrinho</button>' : ''}
+        ${action || (canAddToCart ? '' : '<span class="product-no-action">Compra ainda não liberada.</span>')}
         <a class="btn btn-ghost product-continue" href="index.html#drop">Continuar olhando</a>
       </div>
       <div class="product-detail-notes">

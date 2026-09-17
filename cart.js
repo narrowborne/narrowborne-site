@@ -1,6 +1,16 @@
 (() => {
   const STORAGE_KEY = 'narrowborne-cart-v1';
-  const brand = (window.NB_STORE_DATA && window.NB_STORE_DATA.brand) || {};
+  function getStoreData() {
+    const published = window.NB_STORE_DATA || {};
+    const params = new URLSearchParams(location.search);
+    if (params.get('preview') === '1') {
+      try {
+        const draft = localStorage.getItem('narrowborne-admin-draft');
+        if (draft) return JSON.parse(draft);
+      } catch (_) {}
+    }
+    return published;
+  }
 
   const esc = (value = '') => String(value).replace(/[&<>'"]/g, ch => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
@@ -107,7 +117,33 @@
   }
 
   function whatsappNumber() {
+    const brand = getStoreData().brand || {};
     return String(brand.whatsapp || '').replace(/\D/g, '');
+  }
+
+  function normalizeUrl(url = '') {
+    const value = String(url || '').trim();
+    if (!value) return '';
+    if (/^https?:\/\//i.test(value)) return value;
+    return `https://${value}`;
+  }
+
+  function buildCheckout(cart) {
+    const data = getStoreData();
+    const payments = data.payments || {};
+    const provider = payments.provider || 'external';
+
+    if (provider === 'whatsapp') {
+      return {
+        url: buildWhatsappCheckout(cart),
+        label: payments.checkoutLabel || 'Finalizar pelo WhatsApp'
+      };
+    }
+
+    return {
+      url: normalizeUrl(payments.checkoutUrl || ''),
+      label: payments.checkoutLabel || 'Ir para pagamento'
+    };
   }
 
   function buildWhatsappCheckout(cart) {
@@ -278,15 +314,15 @@
       </article>`).join('');
 
     const totals = cartTotal(cart);
-    const checkout = buildWhatsappCheckout(cart);
+    const checkout = buildCheckout(cart);
     const totalLabel = totals.hasUnknown ? 'A confirmar' : formatMoney(totals.total);
 
     summaryHost.innerHTML = `
       <div class="cart-total-row"><span>Total</span><strong>${esc(totalLabel)}</strong></div>
-      ${checkout
-        ? `<a class="btn btn-solid cart-checkout" href="${esc(checkout)}" target="_blank" rel="noopener">Finalizar pedido</a>`
+      ${checkout.url
+        ? `<a class="btn btn-solid cart-checkout" href="${esc(checkout.url)}" target="_blank" rel="noopener">${esc(checkout.label)}</a>`
         : `<button class="btn btn-solid cart-checkout" type="button" disabled>Finalizar pedido</button>
-           <p class="cart-checkout-note">Configure o WhatsApp da marca no painel para receber pedidos do carrinho.</p>`}
+           <p class="cart-checkout-note">Configure o link do Mercado Pago na área “Pagamento” do painel ADM.</p>`}
       <button class="cart-clear" type="button" data-cart-summary-action="clear">Esvaziar carrinho</button>`;
   }
 

@@ -143,7 +143,6 @@ function renderContacts(brand) {
     const wa = brand.whatsapp.replace(/\D/g,'');
     links.push(`<a class="btn btn-ghost" href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>`);
   }
-  if (!links.length) links.push('<a class="btn btn-solid" href="#top">NARROWBORNE / 2026</a>');
   actions.innerHTML = links.join('');
 
   const footerBits = ['Christian streetwear'];
