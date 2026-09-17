@@ -37,7 +37,7 @@ function buildAction(product, brand) {
     href = normalizeUrl(product.actionUrl || '');
     if (!href) return '';
   }
-  return `<a class="btn btn-solid product-buy" href="${esc(href)}" target="_blank" rel="noopener">${label}</a>`;
+  return `<a class="btn btn-solid product-buy" href="${esc(href)}" target="_blank" rel="noopener" data-action-type="${esc(type)}">${label}</a>`;
 }
 
 function fallbackVisual(product) {
@@ -50,6 +50,63 @@ function fallbackVisual(product) {
       <text x="210" y="274" text-anchor="middle" class="tee-sub ${tone==='bone'?'dark-print':''}">NARROWBORNE</text>
     </svg>
   </div>`;
+}
+
+function wireProductOptions(host, product) {
+  const sizeButtons = [...host.querySelectorAll('.product-size-option')];
+  const buyButton = host.querySelector('.product-buy');
+  const feedback = host.querySelector('.product-size-feedback');
+  let selectedSize = '';
+
+  if (!buyButton) return;
+
+  if (sizeButtons.length) {
+    buyButton.classList.add('is-waiting-size');
+    buyButton.setAttribute('aria-disabled', 'true');
+  }
+
+  sizeButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      selectedSize = button.dataset.size || '';
+      sizeButtons.forEach(item => {
+        const selected = item === button;
+        item.classList.toggle('is-selected', selected);
+        item.setAttribute('aria-pressed', selected ? 'true' : 'false');
+      });
+
+      buyButton.classList.remove('is-waiting-size');
+      buyButton.setAttribute('aria-disabled', 'false');
+
+      if (feedback) {
+        feedback.textContent = `Tamanho ${selectedSize} selecionado.`;
+        feedback.classList.remove('is-error');
+        feedback.classList.add('is-ok');
+      }
+    });
+  });
+
+  buyButton.addEventListener('click', event => {
+    if (sizeButtons.length && !selectedSize) {
+      event.preventDefault();
+      if (feedback) {
+        feedback.textContent = 'Selecione um tamanho para continuar.';
+        feedback.classList.remove('is-ok');
+        feedback.classList.add('is-error');
+      }
+      sizeButtons[0]?.focus();
+      return;
+    }
+
+    if (buyButton.dataset.actionType === 'whatsapp' && selectedSize) {
+      try {
+        const url = new URL(buyButton.href);
+        url.searchParams.set('text', `Olá! Quero comprar ${product.name || 'esta peça'} da NARROWBORNE. Tamanho: ${selectedSize}.`);
+        buyButton.href = url.toString();
+      } catch (e) {
+        console.warn('Não foi possível adicionar o tamanho à mensagem do WhatsApp.', e);
+      }
+    }
+  });
 }
 
 function render() {
@@ -69,9 +126,10 @@ function render() {
   const visual = image
     ? `<div class="product-detail-visual product-detail-photo"><img src="${esc(image)}" alt="${esc(product.name)}"></div>`
     : fallbackVisual(product);
-  const sizes = (product.sizes || []).map(size => `<span>${esc(size)}</span>`).join('');
-  const price = product.price ? `<div class="product-detail-price">${esc(product.price)}</div>` : `<div class="product-detail-status">${esc(product.status || 'Em breve')}</div>`;
   const action = buildAction(product, data.brand || {});
+  const canBuy = Boolean(action);
+  const sizes = (product.sizes || []).map(size => `<button type="button" class="product-size-option" data-size="${esc(size)}" aria-pressed="false" ${canBuy ? '' : 'disabled'}>${esc(size)}</button>`).join('');
+  const price = product.price ? `<div class="product-detail-price">${esc(product.price)}</div>` : `<div class="product-detail-status">${esc(product.status || 'Em breve')}</div>`;
 
   host.innerHTML = `<section class="product-detail">
     <div class="product-detail-media">${visual}</div>
@@ -80,7 +138,7 @@ function render() {
       <h1>${esc(product.name || '')}</h1>
       ${price}
       <p class="product-detail-description">${esc(product.description || '')}</p>
-      ${sizes ? `<div class="product-size-block"><span class="product-detail-label">Tamanhos</span><div class="product-sizes">${sizes}</div></div>` : ''}
+      ${sizes ? `<div class="product-size-block"><span class="product-detail-label">Tamanhos</span><div class="product-sizes">${sizes}</div>${canBuy ? '<p class="product-size-feedback" aria-live="polite">Escolha seu tamanho.</p>' : '<p class="product-size-feedback">Tamanhos serão liberados junto com a compra.</p>'}</div>` : ''}
       <div class="product-detail-actions">
         ${action || '<span class="product-no-action">Compra ainda não liberada.</span>'}
         <a class="btn btn-ghost" href="index.html#drop">Continuar olhando</a>
@@ -91,6 +149,8 @@ function render() {
       </div>
     </div>
   </section>`;
+
+  wireProductOptions(host, product);
 }
 
 render();
