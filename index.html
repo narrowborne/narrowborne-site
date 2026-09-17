@@ -9,7 +9,8 @@
   <link rel="preload" href="assets/narrowborne-wordmark.png" as="image" />
   <link rel="preload" href="assets/narrowborne-mark.png" as="image" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <script src="store-data.js"></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -30,12 +31,12 @@
   <main id="top">
     <section class="hero section-shell">
       <div class="hero-copy reveal">
-        <p class="eyebrow">Christian streetwear · São Paulo</p>
-        <h1>FEW<br><span>FIND IT.</span></h1>
-        <p class="hero-text">Uma marca para quem escolhe o caminho estreito sem esconder a própria identidade.</p>
+        <p class="eyebrow" id="heroEyebrow">Christian streetwear · São Paulo</p>
+        <h1><span id="heroTitleTop" class="hero-solid">FEW</span><br><span id="heroTitleBottom">FIND IT.</span></h1>
+        <p class="hero-text" id="heroText">Uma marca para quem escolhe o caminho estreito sem esconder a própria identidade.</p>
         <div class="hero-actions">
-          <a class="btn btn-solid" href="#drop">Conhecer o primeiro drop</a>
-          <a class="btn btn-ghost" href="#manifesto">Mateus 7:14</a>
+          <a class="btn btn-solid" href="#drop" id="heroPrimaryCta">Conhecer o primeiro drop</a>
+          <a class="btn btn-ghost" href="#manifesto" id="heroSecondaryCta">Mateus 7:14</a>
         </div>
       </div>
 
@@ -62,70 +63,22 @@
     <section id="drop" class="drop section-shell section-pad">
       <div class="section-head reveal">
         <div>
-          <p class="eyebrow">First capsule</p>
-          <h2>DROP 01</h2>
+          <p class="eyebrow" id="dropEyebrow">First capsule</p>
+          <h2 id="dropTitle">DROP 01</h2>
         </div>
-        <p>Conceitos iniciais da coleção. A estrutura já está pronta para você trocar pelas fotos e preços reais quando produzir as peças.</p>
+        <p id="dropDescription">Primeira cápsula NARROWBORNE.</p>
       </div>
 
-      <div class="product-grid">
-        <article class="product-card reveal">
-          <div class="product-visual tone-black">
-            <span class="product-code">01 / 03</span>
-            <svg viewBox="0 0 420 500" role="img" aria-label="Camiseta oversized preta Narrow 714">
-              <path class="tee" d="M132 80 66 115 25 192l78 40 22-43v236h170V189l22 43 78-40-41-77-66-35-34 28h-88z"/>
-              <path class="neck" d="M166 80c7 29 80 29 88 0"/>
-              <text x="210" y="245" text-anchor="middle" class="tee-title">NARROW</text>
-              <text x="210" y="272" text-anchor="middle" class="tee-sub">07:14</text>
-            </svg>
-          </div>
-          <div class="product-meta">
-            <div><h3>NARROW 714</h3><p>Oversized · Black</p></div>
-            <span>Em breve</span>
-          </div>
-        </article>
-
-        <article class="product-card reveal delay-1">
-          <div class="product-visual tone-ash">
-            <span class="product-code">02 / 03</span>
-            <svg viewBox="0 0 420 500" role="img" aria-label="Camiseta oversized cinza Made New 517">
-              <path class="tee" d="M132 80 66 115 25 192l78 40 22-43v236h170V189l22 43 78-40-41-77-66-35-34 28h-88z"/>
-              <path class="neck" d="M166 80c7 29 80 29 88 0"/>
-              <text x="210" y="240" text-anchor="middle" class="tee-title">MADE NEW</text>
-              <text x="210" y="269" text-anchor="middle" class="tee-sub">II COR · 05:17</text>
-            </svg>
-          </div>
-          <div class="product-meta">
-            <div><h3>MADE NEW 517</h3><p>Oversized · Washed ash</p></div>
-            <span>Em breve</span>
-          </div>
-        </article>
-
-        <article class="product-card reveal delay-2">
-          <div class="product-visual tone-bone">
-            <span class="product-code">03 / 03</span>
-            <svg viewBox="0 0 420 500" role="img" aria-label="Camiseta oversized clara Light 15">
-              <path class="tee" d="M132 80 66 115 25 192l78 40 22-43v236h170V189l22 43 78-40-41-77-66-35-34 28h-88z"/>
-              <path class="neck" d="M166 80c7 29 80 29 88 0"/>
-              <text x="210" y="236" text-anchor="middle" class="tee-title dark-print">LIGHT</text>
-              <text x="210" y="268" text-anchor="middle" class="tee-sub dark-print">JOHN · 01:05</text>
-            </svg>
-          </div>
-          <div class="product-meta">
-            <div><h3>LIGHT 15</h3><p>Oversized · Bone</p></div>
-            <span>Em breve</span>
-          </div>
-        </article>
-      </div>
+      <div class="product-grid" id="productGrid"></div>
     </section>
 
     <section id="manifesto" class="manifesto section-shell section-pad">
       <div class="manifesto-number reveal">07:14</div>
       <div class="manifesto-copy reveal delay-1">
-        <p class="eyebrow">The narrow way</p>
-        <h2>NÃO É SÓ<br>O QUE VOCÊ VESTE.</h2>
-        <p>NARROWBORNE nasce da ideia do caminho estreito de Mateus 7:14: uma identidade construída em fé, propósito e escolha. Sem excesso. Sem precisar gritar para ser reconhecida.</p>
-        <p class="scripture">MATTHEW 7:14 · FEW FIND IT.</p>
+        <p class="eyebrow" id="manifestoEyebrow">The narrow way</p>
+        <h2 id="manifestoTitle">NÃO É SÓ<br>O QUE VOCÊ VESTE.</h2>
+        <p id="manifestoText">NARROWBORNE nasce da ideia do caminho estreito de Mateus 7:14: uma identidade construída em fé, propósito e escolha. Sem excesso. Sem precisar gritar para ser reconhecida.</p>
+        <p class="scripture" id="manifestoScripture">MATTHEW 7:14 · FEW FIND IT.</p>
       </div>
     </section>
 
@@ -157,8 +110,8 @@
         <h2>ENTRE ANTES<br>DA MULTIDÃO.</h2>
       </div>
       <div class="join-box">
-        <p>Use esta área depois para WhatsApp, Instagram ou lista de lançamento.</p>
-        <a class="btn btn-solid" href="#top">NARROWBORNE / 2026</a>
+        <p id="contactText">Acompanhe a NARROWBORNE e receba novidades dos próximos drops.</p>
+        <div class="contact-actions" id="contactActions"></div>
       </div>
     </section>
   </main>
@@ -168,7 +121,7 @@
       <img src="assets/narrowborne-mark.png" alt="" />
       <strong>NARROWBORNE</strong>
     </div>
-    <p>Christian streetwear · São Paulo, Brasil</p>
+    <p id="footerContact">Christian streetwear · São Paulo, Brasil</p>
     <p>© <span id="year"></span> NARROWBORNE</p>
   </footer>
 
