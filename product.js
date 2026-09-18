@@ -176,3 +176,10 @@ function render() {
 }
 
 render();
+
+
+window.addEventListener('nb-store-ready', (event) => {
+  if (!event.detail) return;
+  data = event.detail;
+  render();
+});

@@ -143,6 +143,7 @@ function renderContacts(brand) {
     const wa = brand.whatsapp.replace(/\D/g,'');
     links.push(`<a class="btn btn-ghost" href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>`);
   }
+  if (!links.length) links.push('<a class="btn btn-solid" href="#top">NARROWBORNE / 2026</a>');
   actions.innerHTML = links.join('');
 
   const footerBits = ['Christian streetwear'];
@@ -162,3 +163,10 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 if ($('year')) $('year').textContent = new Date().getFullYear();
 renderSite();
+
+
+window.addEventListener('nb-store-ready', (event) => {
+  if (!event.detail) return;
+  storeData = event.detail;
+  renderSite();
+});

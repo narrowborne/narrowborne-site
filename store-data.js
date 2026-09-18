@@ -75,3 +75,19 @@ window.NB_STORE_DATA = {
     }
   ]
 };
+
+// Dados publicados vêm do Supabase. O bloco acima é apenas um fallback caso a API fique indisponível.
+(() => {
+  const STORE_API = 'https://nseqwtiwsabglzqqwibb.supabase.co/functions/v1/public-store';
+  fetch(STORE_API, { headers: { 'Accept': 'application/json' }, cache: 'no-store' })
+    .then(async (response) => {
+      if (!response.ok) throw new Error('Falha ao carregar a loja.');
+      return response.json();
+    })
+    .then((data) => {
+      if (!data || !Array.isArray(data.products)) return;
+      window.NB_STORE_DATA = data;
+      window.dispatchEvent(new CustomEvent('nb-store-ready', { detail: data }));
+    })
+    .catch((error) => console.warn('NARROWBORNE: usando dados locais de segurança.', error));
+})();
