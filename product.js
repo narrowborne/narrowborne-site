@@ -153,7 +153,7 @@ function render() {
   const price = product.price ? `<div class="product-detail-price">${esc(product.price)}</div>` : `<div class="product-detail-status">${esc(product.status || 'Em breve')}</div>`;
 
   host.innerHTML = `<section class="product-detail">
-    <div class="product-detail-media">${visual}</div>
+    <div class="product-detail-media">${visual}${renderProductExtraInfo()}</div>
     <div class="product-detail-copy">
       <p class="eyebrow">${esc(product.subtitle || 'NARROWBORNE')}</p>
       <h1>${esc(product.name || '')}</h1>

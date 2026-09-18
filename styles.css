@@ -133,3 +133,67 @@ button:disabled, .product-size-option:disabled, .cart-checkout:disabled {
 
 @media(max-width:580px){.nb-support-root{right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom))}.nb-chat-launcher{min-height:56px;padding:7px;border-radius:17px}.nb-chat-launcher-icon{width:42px;height:42px}.nb-chat-launcher-copy{display:none}.nb-chat-panel{position:fixed;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));width:auto;height:min(680px,calc(100svh - 20px));border-radius:18px;transform-origin:bottom center}.nb-chat-messages{padding-top:14px}.nb-message-bubble{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.nb-chat-panel,.nb-chat-launcher{transition:none}.nb-chat-typing span{animation:none}}
+
+
+/* Melhorias página de produto */
+.product-detail-photo img{
+  cursor: zoom-in;
+  transition: transform .3s ease;
+}
+.product-detail-photo img:hover{
+  transform:scale(1.03);
+}
+.product-extra-info{
+  margin-top:30px;
+  border-top:1px solid #191919;
+}
+.product-extra-info details{
+  border-bottom:1px solid #191919;
+  padding:18px 0;
+}
+.product-extra-info summary{
+  cursor:pointer;
+  font-size:12px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.product-extra-info p{
+  color:#999;
+  line-height:1.7;
+  font-size:13px;
+}
+.nb-product-lightbox{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  background:rgba(0,0,0,.9);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:30px;
+}
+.nb-product-lightbox.is-open{display:flex}
+.nb-product-lightbox img{
+  max-width:95vw;
+  max-height:90vh;
+}
+.nb-product-lightbox button{
+  position:absolute;
+  top:20px;
+  right:25px;
+  background:none;
+  border:0;
+  color:#fff;
+  font-size:40px;
+  cursor:pointer;
+}
+
+@media(max-width:580px){
+  .product-detail-actions{
+    position:sticky;
+    bottom:10px;
+    z-index:20;
+    background:#050505;
+    padding:10px 0;
+  }
+}
