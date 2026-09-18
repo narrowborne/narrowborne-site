@@ -128,7 +128,37 @@ function wireProductOptions(host, product) {
     }
   });
 }
+function renderProductExtraInfo(){
+  return `
+    <section class="product-extra-info">
+      <details open>
+        <summary>📏 Guia de tamanho</summary>
+        <p>
+          P: 68cm x 52cm<br>
+          M: 70cm x 55cm<br>
+          G: 72cm x 58cm<br>
+          GG: 75cm x 62cm
+        </p>
+      </details>
 
+      <details>
+        <summary>🧵 Tecido e acabamento</summary>
+        <p>
+          Algodão premium · Modelagem oversized ·
+          Tecido encorpado · Costura reforçada.
+        </p>
+      </details>
+
+      <details>
+        <summary>✦ História da peça</summary>
+        <p>
+          Uma peça criada para representar fé,
+          propósito e identidade.
+        </p>
+      </details>
+    </section>
+  `;
+}
 function render() {
   const id = qs.get('id');
   const products = (data.products || []).filter(p => p.active !== false);
