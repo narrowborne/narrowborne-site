@@ -1,113 +1,132 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#050505">
-  <title>NARROWBORNE · Admin</title>
-  <link rel="icon" type="image/png" href="../favicon.png">
-  <link rel="stylesheet" href="admin.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#050505" />
+  <meta name="description" content="NARROWBORNE — streetwear cristão. Fé, direção e identidade." />
+  <title>NARROWBORNE — Few Find It.</title>
+  <link rel="preload" href="assets/narrowborne-wordmark.png" as="image" />
+  <link rel="preload" href="assets/narrowborne-mark.png" as="image" />
+  <link rel="stylesheet" href="styles.css?v=cursor-fix-2" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <script src="store-data.js"></script>
 </head>
 <body>
-  <section class="login-screen" id="loginScreen">
-    <div class="login-card">
-      <div class="mark">N</div>
-      <p class="kicker">NARROWBORNE</p>
-      <h1>PAINEL ADM</h1>
-      <p class="muted">Entre com seu acesso administrativo. Nenhuma senha fica salva no GitHub.</p>
-      <form id="loginForm">
-        <label>E-mail<input id="loginEmail" type="email" autocomplete="username" required placeholder="seu@email.com"></label>
-        <label>Senha<input id="loginPassword" type="password" autocomplete="current-password" required placeholder="••••••••"></label>
-        <button class="btn primary" type="submit" id="loginButton">ENTRAR</button>
-        <p class="form-error" id="loginError"></p>
-      </form>
-    </div>
-  </section>
+  <div class="grain" aria-hidden="true"></div>
 
-  <div class="app" id="app" hidden>
-    <header class="topbar">
-      <div class="brand"><div class="brand-mark">N</div><div><strong>NARROWBORNE</strong><span>ADMINISTRADOR</span></div></div>
-      <div class="top-actions"><span class="save-state" id="saveState">Tudo certo</span><a class="btn ghost" href="../" target="_blank">VER LOJA</a><button class="btn ghost" id="logoutBtn">SAIR</button></div>
-    </header>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Narrowborne — início">
+      <img src="assets/narrowborne-mark.png" alt="" class="brand-mark" />
+      <span>NARROWBORNE</span>
+    </a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="#drop">Drop 01</a>
+      <a href="#manifesto">Manifesto</a>
+      <a href="#quality">Qualidade</a>
+    </nav>
+    <a class="nav-cta" href="#drop">Explorar</a>
+  </header>
 
-    <div class="shell">
-      <aside class="sidebar">
-        <button class="nav active" data-page="dashboard"><b>01</b><span>Visão geral</span></button>
-        <button class="nav" data-page="products"><b>02</b><span>Produtos</span></button>
-        <button class="nav" data-page="orders"><b>03</b><span>Pedidos</span></button>
-        <button class="nav" data-page="store"><b>04</b><span>Loja</span></button>
-        <button class="nav" data-page="help"><b>05</b><span>Ajuda</span></button>
-        <div class="security-note"><span>●</span> Login + backend protegido. Chaves privadas não ficam neste painel.</div>
-      </aside>
-
-      <main class="content">
-        <section class="page active" id="page-dashboard">
-          <div class="page-head"><div><p class="kicker">CONTROLE CENTRAL</p><h2>VISÃO GERAL</h2><p class="muted">O que importa, sem complicação.</p></div><button class="btn primary" data-go="products">EDITAR PRODUTOS</button></div>
-          <div class="stats">
-            <article><span>Produtos ativos</span><strong id="statActive">—</strong></article>
-            <article><span>Pedidos registrados</span><strong id="statOrders">—</strong></article>
-            <article><span>Pedidos aprovados</span><strong id="statPaid">—</strong></article>
-            <article><span>Faturamento aprovado</span><strong id="statRevenue">—</strong></article>
-          </div>
-          <div class="panel-card"><div class="card-head"><div><p class="kicker">ÚLTIMOS PEDIDOS</p><h3>Movimento recente</h3></div><button class="text-btn" data-go="orders">Ver todos →</button></div><div id="recentOrders"></div></div>
-        </section>
-
-        <section class="page" id="page-products">
-          <div class="page-head"><div><p class="kicker">CATÁLOGO</p><h2>PRODUTOS</h2><p class="muted">Preço, foto, tamanhos e disponibilidade em um lugar só.</p></div><button class="btn primary" id="newProductBtn">+ NOVO PRODUTO</button></div>
-          <div class="product-list" id="productList"></div>
-        </section>
-
-        <section class="page" id="page-orders">
-          <div class="page-head"><div><p class="kicker">VENDAS</p><h2>PEDIDOS</h2><p class="muted">Acompanhe o que entrou pelo checkout.</p></div><button class="btn ghost" id="refreshOrdersBtn">ATUALIZAR</button></div>
-          <div class="filters"><input id="orderSearch" placeholder="Buscar por referência ou produto"><select id="orderStatus"><option value="">Todos os status</option><option value="approved">Aprovado</option><option value="created">Criado</option><option value="pending">Pendente</option><option value="checkout_error">Erro no checkout</option></select></div>
-          <div id="ordersTable"></div>
-        </section>
-
-        <section class="page" id="page-store">
-          <div class="page-head"><div><p class="kicker">CONTEÚDO</p><h2>LOJA</h2><p class="muted">Textos e contatos principais do site.</p></div><button class="btn primary" id="saveStoreBtn">SALVAR ALTERAÇÕES</button></div>
-          <div class="grid-two">
-            <div class="panel-card"><h3>Marca e contato</h3><div class="form-grid"><label>Nome<input id="brandName"></label><label>Domínio<input id="brandDomain"></label><label>Instagram<input id="brandInstagram"></label><label>WhatsApp<input id="brandWhatsapp"></label><label>E-mail<input id="brandEmail" type="email"></label></div></div>
-            <div class="panel-card"><h3>Capa do site</h3><div class="form-grid"><label>Texto pequeno<input id="heroEyebrow"></label><label>Título linha 1<input id="heroTop"></label><label>Título linha 2<input id="heroBottom"></label><label>Descrição<textarea id="heroText" rows="4"></textarea></label></div></div>
-            <div class="panel-card"><h3>Drop</h3><div class="form-grid"><label>Texto pequeno<input id="dropEyebrow"></label><label>Título<input id="dropTitle"></label><label>Descrição<textarea id="dropDescription" rows="4"></textarea></label></div></div>
-            <div class="panel-card"><h3>Manifesto</h3><div class="form-grid"><label>Texto pequeno<input id="manifestoEyebrow"></label><label>Título<textarea id="manifestoTitle" rows="3"></textarea></label><label>Texto<textarea id="manifestoText" rows="4"></textarea></label><label>Referência<input id="manifestoScripture"></label></div></div>
-          </div>
-        </section>
-
-        <section class="page" id="page-help">
-          <div class="page-head"><div><p class="kicker">SEM ENROLAÇÃO</p><h2>COMO FUNCIONA</h2><p class="muted">Você não precisa abrir o Supabase para mudar preço no dia a dia.</p></div></div>
-          <div class="help-grid">
-            <article><b>1</b><h3>Você altera aqui</h3><p>Edite preço, foto, tamanho ou texto e clique em salvar.</p></article>
-            <article><b>2</b><h3>Vai para o Supabase</h3><p>O painel grava a mudança na base oficial da loja.</p></article>
-            <article><b>3</b><h3>O site acompanha</h3><p>O site consulta essa mesma base e mostra o valor atualizado.</p></article>
-            <article><b>4</b><h3>Mercado Pago acompanha</h3><p>No pagamento, o backend busca o preço oficial no Supabase. Não usa um valor digitado pelo navegador.</p></article>
-          </div>
-          <div class="panel-card warning-card"><h3>O que NÃO vai para o GitHub</h3><p>Access Token do Mercado Pago, service role do Supabase, senha do banco e sua senha de administrador. O código público só contém informações próprias para frontend.</p></div>
-        </section>
-      </main>
-    </div>
-  </div>
-
-  <div class="modal" id="productModal" hidden>
-    <div class="modal-backdrop" data-close-modal></div>
-    <div class="modal-card">
-      <div class="modal-head"><div><p class="kicker">PRODUTO</p><h3 id="productModalTitle">Editar produto</h3></div><button class="icon-btn" data-close-modal>×</button></div>
-      <form id="productForm">
-        <input type="hidden" id="productId">
-        <div class="image-box"><img id="productPreview" alt=""><div><strong>Foto do produto</strong><span>PNG, JPG ou WEBP · até 8 MB</span><label class="btn ghost file-btn">ESCOLHER FOTO<input id="productImageFile" type="file" accept="image/png,image/jpeg,image/webp"></label><input id="productImagePath" type="hidden"></div></div>
-        <div class="form-grid two">
-          <label>Nome<input id="productName" required></label><label>Subtítulo<input id="productSubtitle"></label>
-          <label>Preço (R$)<input id="productPrice" inputmode="decimal" placeholder="149,90"></label><label>Ordem<input id="productSort" type="number" value="0"></label>
-          <label class="wide">Descrição<textarea id="productDescription" rows="4"></textarea></label>
-          <label>Tamanhos<input id="productSizes" placeholder="P, M, G, GG"></label><label>Status curto<input id="productStatus" placeholder="Disponível"></label>
-          <label>Tom<select id="productTone"><option value="black">Preto</option><option value="ash">Cinza</option><option value="bone">Claro</option></select></label>
-          <label class="toggle"><input id="productActive" type="checkbox" checked><span>Produto visível no site</span></label>
+  <main id="top">
+    <section class="hero section-shell">
+      <div class="hero-copy reveal">
+        <p class="eyebrow" id="heroEyebrow">Christian streetwear · São Paulo</p>
+        <h1><span id="heroTitleTop" class="hero-solid">FEW</span><br><span id="heroTitleBottom">FIND IT.</span></h1>
+        <p class="hero-text" id="heroText">Uma marca para quem escolhe o caminho estreito sem esconder a própria identidade.</p>
+        <div class="hero-actions">
+          <a class="btn btn-solid" href="#drop" id="heroPrimaryCta">Conhecer o primeiro drop</a>
+          <a class="btn btn-ghost" href="#manifesto" id="heroSecondaryCta">Mateus 7:14</a>
         </div>
-        <div class="modal-actions"><button class="btn danger" type="button" id="deleteProductBtn">EXCLUIR</button><div class="spacer"></div><button class="btn ghost" type="button" data-close-modal>CANCELAR</button><button class="btn primary" type="submit" id="saveProductBtn">SALVAR PRODUTO</button></div>
-      </form>
-    </div>
-  </div>
+      </div>
 
-  <div class="toast" id="toast"></div>
-  <script src="admin.js"></script>
+      <div class="hero-art reveal delay-1" aria-label="Identidade visual Narrowborne">
+        <div class="orb orb-a"></div>
+        <div class="orb orb-b"></div>
+        <div class="mark-frame">
+          <img src="assets/narrowborne-mark.png" alt="Símbolo da Narrowborne" />
+        </div>
+        <div class="hero-tag tag-top">EST. 2026</div>
+        <div class="hero-tag tag-bottom">NARROW WAY / 07:14</div>
+      </div>
+
+      <div class="scroll-cue" aria-hidden="true"><span></span></div>
+    </section>
+
+    <section class="marquee" aria-label="Conceitos da marca">
+      <div class="marquee-track">
+        <span>FAITH</span><i>✦</i><span>STREETWEAR</span><i>✦</i><span>NARROW WAY</span><i>✦</i><span>SET APART</span><i>✦</i>
+        <span>FAITH</span><i>✦</i><span>STREETWEAR</span><i>✦</i><span>NARROW WAY</span><i>✦</i><span>SET APART</span><i>✦</i>
+      </div>
+    </section>
+
+    <section id="drop" class="drop section-shell section-pad">
+      <div class="section-head reveal">
+        <div>
+          <p class="eyebrow" id="dropEyebrow">First capsule</p>
+          <h2 id="dropTitle">DROP 01</h2>
+        </div>
+        <p id="dropDescription">Primeira cápsula NARROWBORNE.</p>
+      </div>
+
+      <div class="product-grid" id="productGrid"></div>
+    </section>
+
+    <section id="manifesto" class="manifesto section-shell section-pad">
+      <div class="manifesto-number reveal">07:14</div>
+      <div class="manifesto-copy reveal delay-1">
+        <p class="eyebrow" id="manifestoEyebrow">The narrow way</p>
+        <h2 id="manifestoTitle">NÃO É SÓ<br>O QUE VOCÊ VESTE.</h2>
+        <p id="manifestoText">NARROWBORNE nasce da ideia do caminho estreito de Mateus 7:14: uma identidade construída em fé, propósito e escolha. Sem excesso. Sem precisar gritar para ser reconhecida.</p>
+        <p class="scripture" id="manifestoScripture">MATTHEW 7:14 · FEW FIND IT.</p>
+      </div>
+    </section>
+
+    <section id="quality" class="quality section-shell section-pad">
+      <div class="section-head reveal">
+        <div>
+          <p class="eyebrow">Direção de produto</p>
+          <h2>BUILT TO FEEL<br>LIKE A BRAND.</h2>
+        </div>
+        <p>O site está preparado para apresentar a linha como streetwear premium sem ficar pesado: tipografia forte, muito espaço, movimento mínimo e carregamento rápido.</p>
+      </div>
+
+      <div class="quality-grid">
+        <div class="quality-item reveal"><span>01</span><h3>OVERSIZED</h3><p>Modelagem ampla, ombro deslocado e visual urbano.</p></div>
+        <div class="quality-item reveal delay-1"><span>02</span><h3>HEAVY COTTON</h3><p>Direção para malhas encorpadas e toque premium.</p></div>
+        <div class="quality-item reveal delay-2"><span>03</span><h3>WASHED</h3><p>Acabamentos estonados e tons sóbrios para os drops.</p></div>
+        <div class="quality-item reveal delay-3"><span>04</span><h3>DETAIL</h3><p>Etiqueta própria, tag, bordado e estampa como assinatura.</p></div>
+      </div>
+    </section>
+
+    <section class="statement section-shell section-pad reveal">
+      <img src="assets/narrowborne-wordmark.png" alt="Narrowborne" />
+      <p>FAITH · DIRECTION · IDENTITY</p>
+    </section>
+
+    <section class="join section-shell section-pad reveal">
+      <div>
+        <p class="eyebrow">First drop incoming</p>
+        <h2>ENTRE ANTES<br>DA MULTIDÃO.</h2>
+      </div>
+      <div class="join-box">
+        <p id="contactText">Acompanhe a NARROWBORNE e receba novidades dos próximos drops.</p>
+        <div class="contact-actions" id="contactActions"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer section-shell">
+    <div class="footer-brand">
+      <img src="assets/narrowborne-mark.png" alt="" />
+      <strong>NARROWBORNE</strong>
+    </div>
+    <p id="footerContact">Christian streetwear · São Paulo, Brasil</p>
+    <p>© <span id="year"></span> NARROWBORNE</p>
+  </footer>
+
+  <script src="cart.js"></script>
+  <script src="script.js"></script>
+  <script src="chat.js"></script>
 </body>
 </html>
