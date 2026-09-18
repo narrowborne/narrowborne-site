@@ -1,5 +1,5 @@
 (() => {
-  const HISTORY_KEY = 'narrowborne-support-chat-v1';
+  const HISTORY_KEY = 'narrowborne-support-chat-session-v1';
   const MAX_HISTORY = 60;
 
   function getStoreData() {
@@ -88,7 +88,7 @@
 
   function loadState() {
     try {
-      const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}');
+      const saved = JSON.parse(sessionStorage.getItem(HISTORY_KEY) || '{}');
       return {
         sessionId: saved.sessionId || createSessionId(),
         messages: Array.isArray(saved.messages) ? saved.messages.slice(-MAX_HISTORY) : [],
@@ -106,7 +106,7 @@
 
   function persist() {
     try {
-      localStorage.setItem(HISTORY_KEY, JSON.stringify({
+      sessionStorage.setItem(HISTORY_KEY, JSON.stringify({
         sessionId: state.sessionId,
         messages: state.messages.slice(-MAX_HISTORY),
         lastIntentId: state.lastIntentId || ''
