@@ -9,8 +9,8 @@ const money=cents=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL
 const esc=(v='')=>String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400)}
 function saveState(msg='Tudo certo',busy=false){const el=$('saveState');el.textContent=msg;el.style.color=busy?'#ddd':'#6f6'}
-function session(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch{return null}}
-function setSession(v){v?localStorage.setItem(SESSION_KEY,JSON.stringify(v)):localStorage.removeItem(SESSION_KEY)}
+function session(){try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null')}catch{return null}}
+function setSession(v){v?sessionStorage.setItem(SESSION_KEY,JSON.stringify(v)):sessionStorage.removeItem(SESSION_KEY}
 
 async function authFetch(path,options={}){return fetch(SUPABASE_URL+'/auth/v1'+path,{...options,headers:{'apikey':SUPABASE_PUBLISHABLE,'Content-Type':'application/json',...(options.headers||{})}})}
 async function refreshSession(s){if(!s?.refresh_token)return null;const r=await authFetch('/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:s.refresh_token})});if(!r.ok)return null;const n=await r.json();setSession(n);return n}
