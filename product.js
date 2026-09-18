@@ -147,7 +147,8 @@ function render() {
     ? `<div class="product-detail-visual product-detail-photo"><img src="${esc(image)}" alt="${esc(product.name)}"></div>`
     : fallbackVisual(product);
   const action = buildAction(product, data.brand || {});
-  const canAddToCart = Boolean(product.price);
+  const canAddToCart = Boolean(product.price && product.active !== false);
+  const canBuyDirect = Boolean(action);
   const sizes = (product.sizes || []).map(size => `<button type="button" class="product-size-option" data-size="${esc(size)}" aria-pressed="false" ${canAddToCart ? '' : 'disabled'}>${esc(size)}</button>`).join('');
   const price = product.price ? `<div class="product-detail-price">${esc(product.price)}</div>` : `<div class="product-detail-status">${esc(product.status || 'Em breve')}</div>`;
 
@@ -161,7 +162,7 @@ function render() {
       ${sizes ? `<div class="product-size-block"><span class="product-detail-label">Tamanhos</span><div class="product-sizes">${sizes}</div>${canAddToCart ? '<p class="product-size-feedback" aria-live="polite">Escolha seu tamanho.</p>' : '<p class="product-size-feedback">Tamanhos serão liberados junto com a compra.</p>'}</div>` : ''}
       <div class="product-detail-actions">
         ${canAddToCart ? '<button type="button" class="btn btn-solid product-add-cart">Adicionar ao carrinho</button>' : ''}
-        ${action || (canAddToCart ? '' : '<span class="product-no-action">Compra ainda não liberada.</span>')}
+        ${canBuyDirect ? action : ''}
         <a class="btn btn-ghost product-continue" href="index.html#drop">Continuar olhando</a>
       </div>
       <div class="product-detail-notes">

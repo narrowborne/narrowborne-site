@@ -1,16 +1,9 @@
 (() => {
   const STORAGE_KEY = 'narrowborne-cart-v1';
-  function getStoreData() {
-    const published = window.NB_STORE_DATA || {};
-    const params = new URLSearchParams(location.search);
-    if (params.get('preview') === '1') {
-      try {
-        const draft = localStorage.getItem('narrowborne-admin-draft');
-        if (draft) return JSON.parse(draft);
-      } catch (_) {}
-    }
-    return published;
-  }
+  const brand = (window.NB_STORE_DATA && window.NB_STORE_DATA.brand) || {};
+  const SUPABASE_URL = 'https://nseqwtiwsabglzqqwibb.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZXF3dGl3c2FiZ2x6cXF3aWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2OTU1OTIsImV4cCI6MjEwNTI3MTU5Mn0.8p-s-1kt9kgXxZ65hnoCOXAkPQf-pAPlZyZph9wCsK8';
+  let checkoutInProgress = false;
 
   const esc = (value = '') => String(value).replace(/[&<>'"]/g, ch => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
@@ -116,59 +109,45 @@
     return { total, hasUnknown };
   }
 
-  function whatsappNumber() {
-    const brand = getStoreData().brand || {};
-    return String(brand.whatsapp || '').replace(/\D/g, '');
-  }
+  async function createMercadoPagoCheckout(cart) {
+    if (!cart.length || checkoutInProgress) return;
 
-  function normalizeUrl(url = '') {
-    const value = String(url || '').trim();
-    if (!value) return '';
-    if (/^https?:\/\//i.test(value)) return value;
-    return `https://${value}`;
-  }
+    checkoutInProgress = true;
+    renderCart();
 
-  function buildCheckout(cart) {
-    const data = getStoreData();
-    const payments = data.payments || {};
-    const provider = payments.provider || 'external';
+    try {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          items: cart.map(item => ({
+            id: item.id,
+            size: item.size,
+            quantity: Number(item.quantity || 1)
+          }))
+        })
+      });
 
-    if (provider === 'whatsapp') {
-      return {
-        url: buildWhatsappCheckout(cart),
-        label: payments.checkoutLabel || 'Finalizar pelo WhatsApp'
-      };
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.checkout_url) {
+        throw new Error(data.error || data.detail || 'Não foi possível abrir o checkout.');
+      }
+
+      window.location.href = data.checkout_url;
+    } catch (error) {
+      console.error(error);
+      checkoutInProgress = false;
+      renderCart();
+      const note = document.getElementById('nbCheckoutError');
+      if (note) {
+        note.textContent = error?.message || 'Não foi possível iniciar o pagamento. Tente novamente.';
+      }
     }
-
-    return {
-      url: normalizeUrl(payments.checkoutUrl || ''),
-      label: payments.checkoutLabel || 'Ir para pagamento'
-    };
-  }
-
-  function buildWhatsappCheckout(cart) {
-    const wa = whatsappNumber();
-    if (!wa || !cart.length) return '';
-
-    const totals = cartTotal(cart);
-    const lines = cart.map(item => {
-      const price = item.price ? ` — ${item.price}` : '';
-      return `${item.quantity}x ${item.name} — Tamanho ${item.size}${price}`;
-    });
-
-    const totalLine = totals.hasUnknown
-      ? 'Total: a confirmar'
-      : `Total: ${formatMoney(totals.total)}`;
-
-    const message = [
-      'Olá! Quero finalizar meu pedido NARROWBORNE:',
-      '',
-      ...lines,
-      '',
-      totalLine
-    ].join('\n');
-
-    return `https://wa.me/${wa}?text=${encodeURIComponent(message)}`;
   }
 
   function itemThumb(item) {
@@ -234,6 +213,7 @@
       const button = event.target.closest('[data-cart-summary-action]');
       if (!button) return;
       if (button.dataset.cartSummaryAction === 'clear') clearCart();
+      if (button.dataset.cartSummaryAction === 'checkout') createMercadoPagoCheckout(getCart());
     });
   }
 
@@ -314,16 +294,16 @@
       </article>`).join('');
 
     const totals = cartTotal(cart);
-    const checkout = buildCheckout(cart);
     const totalLabel = totals.hasUnknown ? 'A confirmar' : formatMoney(totals.total);
 
     summaryHost.innerHTML = `
       <div class="cart-total-row"><span>Total</span><strong>${esc(totalLabel)}</strong></div>
-      ${checkout.url
-        ? `<a class="btn btn-solid cart-checkout" href="${esc(checkout.url)}" target="_blank" rel="noopener">${esc(checkout.label)}</a>`
-        : `<button class="btn btn-solid cart-checkout" type="button" disabled>Finalizar pedido</button>
-           <p class="cart-checkout-note">Configure o link do Mercado Pago na área “Pagamento” do painel ADM.</p>`}
-      <button class="cart-clear" type="button" data-cart-summary-action="clear">Esvaziar carrinho</button>`;
+      <button class="btn btn-solid cart-checkout" type="button" data-cart-summary-action="checkout" ${checkoutInProgress ? 'disabled' : ''}>
+        ${checkoutInProgress ? 'Abrindo pagamento...' : 'Finalizar compra'}
+      </button>
+      <p class="cart-checkout-note">Pagamento processado com segurança pelo Mercado Pago.</p>
+      <p class="cart-checkout-note" id="nbCheckoutError" aria-live="polite"></p>
+      <button class="cart-clear" type="button" data-cart-summary-action="clear" ${checkoutInProgress ? 'disabled' : ''}>Esvaziar carrinho</button>`;
   }
 
   window.NBCart = {
