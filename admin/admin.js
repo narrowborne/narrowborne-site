@@ -48,6 +48,6 @@ $('saveStoreBtn').addEventListener('click',async()=>{const old=state.settings||{
 
 async function reloadDashboard(){const data=await api('dashboard');state=data;renderAll()}
 $('refreshOrdersBtn').addEventListener('click',async()=>{try{await reloadDashboard();toast('Pedidos atualizados.')}catch(err){toast(err.message)}});$('orderSearch').addEventListener('input',renderOrders);$('orderStatus').addEventListener('change',renderOrders);
-document.querySelectorAll('.nav').forEach(btn=>btn.addEventListener('click',()=>go(btn.dataset.page)));document.querySelectorAll('[data-go]').forEach(btn=>btn.addEventListener('click',()=>go(btn.dataset.go)));function go(page){document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.dataset.page===page));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('page-'+page).classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('.nav').forEach(btn=>btn.addEventListener('click',()=>go(btn.dataset.page)));document.querySelectorAll('[data-go]').forEach(btn=>btn.addEventListener('click',()=>go(btn.dataset.go)));function go(page){document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.dataset.page===page));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('page-'+page).classList.add('active');document.querySelector('.shell')?.scrollTo({top:0,behavior:'auto'})}
 
 if(session())boot();
