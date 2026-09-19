@@ -1,0 +1,17 @@
+{
+  "metodo": "Geração original pela ferramenta integrada de imagens. Não foram usadas imagens da web.",
+  "artes": [
+    {
+      "arquivo": "assets/images/ink-hero.png",
+      "prompt": "Use case: stylized-concept. Asset type: original fashion website hero artwork, landscape 1536x1024 or wider. Create a spectacular glossy vivid violet liquid ink splash with suspended long drips, forming an abstract energetic sculptural shape on a nearly black background. Dramatic studio lighting, subtle purple reflections, sophisticated sharp high-end youth streetwear visual identity. Main purple artwork concentrated on right half; left half dark quiet negative space for a separate HTML headline. Rich inky material and fluid motion, ultra polished. No people, no clothing, no products, no brand logos, no text, no letters, no watermark. Standalone original artwork, not a website screenshot."
+    },
+    {
+      "arquivo": "assets/images/ink-campaign.png",
+      "prompt": "Use case: ads-marketing. Asset type: original landscape campaign background artwork 1536x1024. Abstract vivid purple paint flowing vertically down textured charcoal black paper, torn poster edges and layered weathered paper texture, art-directed sophisticated youth street graphic. Mostly black and deep charcoal palette with electric violet ink streaks. Clear quiet negative space through left-center for separate HTML text. Tactile high-end editorial closeup with dramatic side light, deliberate composition. No people, no clothing, no products, no typography, no letters, no text, no logos, no watermark. Standalone original abstract artwork, not a website screenshot."
+    },
+    {
+      "arquivo": "assets/images/nb-emblem.png",
+      "prompt": "Use case: logo-brand. Asset type: original square logo emblem 1024x1024 for youth streetwear label NarrowBorne. Design an original interlocking NB monogram, sharp angular white and vivid violet silhouettes with restrained ink drip terminals, on solid nearly black background. Clean legible premium streetwear logo, compact strong silhouette, bold geometric angular letters with distinctive merged stroke, broad margins. Only letters NB, exactly N and B, no other text. Flat vector-like treatment, no mockup, no clothing, no products, no shading or dimensional bevels, no watermark."
+    }
+  ]
+}

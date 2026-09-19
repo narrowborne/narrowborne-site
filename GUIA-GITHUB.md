@@ -82,73 +82,35 @@ Confirme o commit. O botão “Continuar no WhatsApp” passará a aparecer em A
 
 Se o WhatsApp ficar vazio, o site informa que o atendimento está em preparação e permite copiar a consulta. Não existe envio escondido nem número inventado.
 
-## 6. Trocar peças e fotos
+## 6. Catálogo e próxima etapa
 
-As fotos atuais são **referências reais de terceiros**. Elas não confirmam o seu estoque e não vêm com autorização comercial para revenda das fotografias. Antes do lançamento da loja, substitua por fotos próprias ou fornecidas com autorização pelo seu fornecedor. Consulte `FONTES-IMAGENS.json` para a procedência.
+As quatro categorias estão vazias, conforme solicitado. `assets/js/catalogo.js` contém a lista de marcas e `CATALOG_PRODUCTS = []`. Não há fotos, roupas demonstrativas nem preços. Nenhum produto foi cadastrado automaticamente.
 
-1. Coloque a foto em `assets/images/`. Prefira nomes sem espaços e sem acentos, por exemplo `camiseta-nike-preta.webp`.
-2. Abra `assets/js/catalogo.js`.
-3. Encontre a peça correspondente e altere `name`, `brand`, `category`, `image`, `color` e `description`.
-4. Confirme que o arquivo em `image` existe exatamente com aquele nome, inclusive letras maiúsculas e extensão.
-5. Para adicionar uma peça, copie um objeto inteiro dentro de `CATALOG_PRODUCTS`, mantenha as vírgulas e use um `id` exclusivo.
+O painel administrativo ainda NÃO foi criado. Cadastro de produtos, upload de fotos próprias, variações, controle de estoque e publicação ficam para a próxima etapa. A estrutura do catálogo foi mantida separada do visual para facilitar essa integração. Ainda não há autenticação, banco de dados, uploads ou sincronização de estoque.
 
-Exemplo de peça; substitua nome, foto, tamanhos e descrição pelos dados reais:
+## 7. Artes e templates originais
 
-```js
-{
-  "id": "nb-011",
-  "name": "Nome da sua peça",
-  "brand": "Nike",
-  "category": "camisetas",
-  "image": "camiseta-nike-preta.webp",
-  "color": "Preto",
-  "description": "Descrição da peça conferida com seu fornecedor.",
-  "sizes": ["P", "M", "G", "GG"],
-  "collections": ["street", "essenciais"],
-  "featured": true,
-  "source": ""
-}
-```
-
-| Campo | Valores e comportamento |
+| Arquivo | Uso |
 | --- | --- |
-| `category` | `camisetas`, `moletons`, `calcas`, `bones` |
-| `brand` | Deve corresponder a um nome em `CATALOG_BRANDS` |
-| `collections` | `street`, `essenciais`, `minimal`; pode participar de mais de uma |
-| `featured` | `true` coloca a peça entre as candidatas aos quatro destaques da home |
-| `sizes` | Tamanhos de interesse; o site não controla disponibilidade |
+| `assets/images/ink-hero.png` | Banner principal com gotas e splash de tinta roxa |
+| `assets/images/ink-campaign.png` | Arte de campanha para o template Street |
+| `assets/images/nb-emblem.png` | Monograma NB original, cabeçalho e campanha de identidade |
+| `assets/css/ink-theme.css` | Identidade preta/roxa, animações, efeitos e responsividade |
+| `assets/js/app.js` | Templates, páginas e navegação |
+| `docs/ARTES-ORIGINAIS.json` | Prompts usados na geração original |
 
-Mantenha pelo menos uma referência em cada uma das quatro categorias da home, pois a primeira foto de cada categoria é usada no respectivo cartão. A referência de calça Adidas foi identificada como juvenil; a cargo Zara é feminina. Confirme público e tamanhos ao substituir as peças.
+As três artes foram criadas do zero com geração de imagens. Nenhuma fotografia de terceiros permanece no pacote. Os nomes das marcas aparecem em composições tipográficas; não são arquivos de logos copiados dessas marcas.
 
-Os avisos de “referência” estão nos templates e textos do site. Quando cadastrar estoque real, ajuste esses avisos em `app.js`, `index.html` e nos textos institucionais. Não remova os avisos enquanto ainda estiver usando produtos demonstrativos.
+O texto dos banners fica em HTML, separado das artes, e pode ser editado sem gerar outra imagem. Para editar a home, veja a função `home()`. As funções `collection()`, `brandPage()` e `watchBlock()` controlam coleções, marcas e relógios.
 
-## 7. Ajustar os templates e a identidade
+## 8. Movimento
 
-- **Cores:** no começo de `assets/css/style.css`, edite `--ink`, `--paper`, `--purple` e `--lilac`.
-- **Banner principal e blocos de campanhas:** função `home()` em `assets/js/app.js`.
-- **Página de produto:** função `product()`.
-- **Coleções Street / Essenciais / Minimal:** função `collection()`; a composição de peças vem de `collections` em cada produto.
-- **Cabeçalho e rodapé:** `index.html`.
-- **Fotos editoriais:** `editorial-man.webp` e `editorial-woman.webp`; mantenha esses nomes ou atualize os caminhos.
-- **Relógios:** função `watchBlock()`. A seção foi entregue sem fotos nem produtos, com “Em breve”.
+A versão inclui entrada de elementos durante a rolagem, faixa de texto em movimento, respiração lenta da arte principal, resposta ao ponteiro no computador, efeitos nos cards e uma linha de progresso de leitura. O botão de pausa no cabeçalho desativa o movimento e salva a preferência neste navegador. A preferência de movimento reduzido do sistema também é respeitada.
 
-Não é preciso mudar o código da navegação para cada produto novo: as páginas são montadas com os dados do catálogo. Os endereços com `#/` permitem abrir links de peças e atualizar a página sem erro de rota em hospedagens estáticas.
+## 9. Publicação e revisão
 
-## 8. Antes de divulgar
+Antes de substituir o site atual, abra `index.html` localmente e confira a prévia da hospedagem. As categorias vazias são intencionais. Não existe painel administrativo, checkout ou cobrança nesta etapa.
 
-Confira as fotos e as peças reais, preencha o WhatsApp, confirme textos de entrega/troca com sua operação e teste a consulta no celular. Não publique senhas, chaves privadas ou dados de clientes: os arquivos do site são acessíveis a quem navega.
+Não misture o pacote com os arquivos antigos: use o repositório de revisão ou remova as fotos e arquivos que foram substituídos antes de publicar a nova versão. Este pacote não contém as fotografias da entrega anterior.
 
-Esta entrega não inclui pagamentos, checkout, controle de estoque, conta do cliente nem painel administrativo. O site não cobra, não reserva produto e não confirma pedidos. Foi preparado como o catálogo sem preços que você solicitou.
-
-## 9. Resolver os problemas mais comuns
-
-| O que aconteceu | Como resolver |
-| --- | --- |
-| Apareceu só texto, sem o visual | A pasta `assets/css` está faltando ou foi enviada em outro nível |
-| Fotos não aparecem | Confira a pasta `assets/images` e os nomes, incluindo maiúsculas e extensões |
-| A página ficou em branco | Confira se `config.js`, `catalogo.js` e `app.js` estão em `assets/js`; revise vírgulas e aspas se editou o catálogo |
-| A hospedagem mostra 404 | `index.html` precisa estar na pasta definida como saída; neste guia é a raiz `.` |
-| O visual antigo continua | Aguarde a publicação terminar e recarregue com Ctrl+F5 |
-| WhatsApp não aparece | Insira o número completo, com país e DDD, somente dígitos |
-| Uma marca não mostra peças | O catálogo daquela marca ainda não foi preenchido; o site mostra “em preparação” |
-| Não achei login ou carrinho | Não há cadastro nem checkout nesta versão de catálogo sem preços |
+Se faltar o visual, confira o envio de `assets/css/style.css` e `assets/css/ink-theme.css`. Se faltar uma arte, confira `assets/images/`. Mantenha o arquivo `index.html` na raiz da pasta publicada.
