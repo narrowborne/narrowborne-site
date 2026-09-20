@@ -99,7 +99,7 @@ O painel administrativo ainda NÃO foi criado. Cadastro de produtos, upload de f
 | `assets/js/app.js` | Templates, páginas e navegação |
 | `docs/ARTES-ORIGINAIS.json` | Prompts usados na geração original |
 
-As três artes foram criadas do zero com geração de imagens. Nenhuma fotografia de terceiros permanece no pacote. Os nomes das marcas aparecem em composições tipográficas; não são arquivos de logos copiados dessas marcas.
+As três artes principais foram criadas do zero com geração de imagens. Nenhuma fotografia de terceiros permanece no pacote. As marcas são exibidas por arquivos SVG locais, sem dependência de imagens externas.
 
 O texto dos banners fica em HTML, separado das artes, e pode ser editado sem gerar outra imagem. Para editar a home, veja a função `home()`. As funções `collection()`, `brandPage()` e `watchBlock()` controlam coleções, marcas e relógios.
 

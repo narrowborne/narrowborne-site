@@ -2,9 +2,9 @@
 
 Verificado localmente em Chromium:
 
-- 15 marcas na home; zero produtos publicados.
+- 14 marcas na home, com arquivos gráficos locais; zero produtos publicados.
 - Camisetas, calças, bonés e moletons sem qualquer imagem de produto.
-- Apenas três arquivos de imagem: banner, campanha e logo originais.
+- Banner, campanha, logo e quatorze artes SVG de marcas armazenados localmente.
 - Busca e filtros apresentam corretamente o catálogo vazio.
 - Navegação mobile e rotas institucionais funcionando.
 - Pausa das animações persiste depois de recarregar.
