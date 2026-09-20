@@ -1,0 +1,13 @@
+NARROWBORNE — VERSÃO 2
+
+Esta é a versão corrigida do pacote.
+
+Como reconhecer que o arquivo certo está aberto:
+- A faixa superior começa com “CATÁLOGO EM MONTAGEM”.
+- A busca diz “Busque por peça, categoria ou marca”.
+- A abertura diz “DA ROTINA PRO ROLÊ”.
+- A área de marcas usa 14 arquivos gráficos.
+- A marca Cortes não aparece no site nem nos filtros.
+
+Os endereços dos arquivos CSS e JavaScript possuem o identificador nb-v2
+para impedir que o navegador carregue a versão antiga do cache.
